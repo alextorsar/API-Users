@@ -5,17 +5,17 @@ services:
     image: postgres:latest
     restart: always
     container_name: postgreDb_users
-    hostname: myhost
+    hostname: db_users
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     volumes:
       - ./postgre/volumes/Data1:/var/lib/postgresql/data
-      - ./postgre/sql/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sql
-      - ./postgre/sql/data.sql:/docker-entrypoint-initdb.d/data.sql
     healthcheck:
-      test: pg_isready -U postgres
+      test: pg_isready -d db -U admin
+    ports:
+      - "5432:5432"
   web:
         build: .
         command: python manage.py runserver 0.0.0.0:8000
