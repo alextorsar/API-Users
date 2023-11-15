@@ -433,6 +433,9 @@ ALTER TABLE ONLY public.django_migrations ALTER COLUMN id SET DEFAULT nextval('p
 
 COPY public."Users_users" (id, last_login, is_superuser, first_name, last_name, is_staff, is_active, date_joined, name, username, email, password) FROM stdin;
 1	\N	f			f	t	2023-11-08 13:39:15.105044+00	Alex	aleexts	alex@gmail.com	pbkdf2_sha256$260000$andZe1JUMfnW782CxHOzN9$Mm5FivL/mY1shDvV48W0iJoHnsg1AP5b3x8/bFEsXoQ=
+2	\N	f			f	t	2023-11-12 10:27:43.040032+00	Jaime	jaimeets	jaime@gmail.com	pbkdf2_sha256$260000$LBlcAbTjZL1ACYdAQNEjt8$FK5Y7DWcSx9XqtKZk7TC3rpiASUqN3in4+4OHQlnyXM=
+11	\N	f			f	t	2023-11-13 12:10:06.927518+00	Mercedes	mercedes_	mercedes@gmail.com	pbkdf2_sha256$260000$mMeyJI5D8gEYN4vpkmCkFL$nLotNJcRI5OS3tw18sD9kLOK6L08OPSwADLiQNBZ/1M=
+12	\N	f			f	t	2023-11-13 13:06:45.643973+00	Ramon	ramonmatazombies	ramon@gmail.com	pbkdf2_sha256$260000$zaeUV8C6t9MHQEV1wybHMz$+r2s+ZF5PY4FPv4WoDAfUpK+JaYoeajFidCnt5MrmEM=
 \.
 
 
@@ -569,7 +572,7 @@ SELECT pg_catalog.setval('public."Users_users_groups_id_seq"', 1, false);
 -- Name: Users_users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public."Users_users_id_seq"', 1, true);
+SELECT pg_catalog.setval('public."Users_users_id_seq"', 15, true);
 
 
 --
