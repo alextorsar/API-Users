@@ -3,3 +3,7 @@ djangorestframework==3.11.0
 psycopg2-binary>=2.8
 pyjwt==1.7.1
 django-cors-headers==3.5.0
+django_otp
+Pillow==10.1.0
+lxml==4.9.3
+pysd==3.12.0

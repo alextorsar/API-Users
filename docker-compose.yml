@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+  
   db_users:
     image: postgres:latest
     restart: always

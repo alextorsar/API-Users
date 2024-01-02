@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Users
+from .models import Users, Models, SubModels
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,3 +16,13 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+    
+class ModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Models
+        fields = ['id', 'name', 'id_user', 'image', 'file']
+        
+class SubModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubModels
+        fields = ['id', 'id_model', 'file']
