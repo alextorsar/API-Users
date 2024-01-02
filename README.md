@@ -19,8 +19,8 @@ API REST developed with Django to manage users
 1) Go to the root folder of the project (/API-Users)
 2) Execute docker exec -i -t postgreDb_users /bin/bash in order to open database server terminal.
 3) Inside this terminal execute:
-   
-    - psql -U admin -d db -f ./dump-files/dump.sql
+    - Go to /dump-files
+    - pg_dump -U admin -w -h localhost db > dump.sql
     - exit
 5) Commit changes
 
