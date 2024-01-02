@@ -8,6 +8,7 @@ from APIUsers import settings
 import os.path
 from json import loads, dumps
 from .auth import authenticate
+import math
 
 def getModelFromPath(modelPath):
     file, extension = os.path.splitext(modelPath)
@@ -26,6 +27,23 @@ def loadModel(modelPath):
     except Exception as e:
         raise e
 
+def splitLimitsAttributes(variables):
+    i = 0
+    for variable in variables:
+        variable['key'] = i
+        i = i + 1
+        (upperLimit,lowerLimit) = variable['Limits']
+        if(math.isnan(upperLimit)):
+            variable['UpperLimit'] = None
+        else:
+            variable['UpperLimit'] = upperLimit
+        if(math.isnan(lowerLimit)):
+            variable['LowerLimit'] = None
+        else:
+            variable['LowerLimit'] = lowerLimit
+        del variable['Limits']
+    return variables
+
 class ModelDocumentationView(APIView):
     def get(self,request,modelId=-1):
         token = request.COOKIES.get('jwt')
@@ -35,9 +53,9 @@ class ModelDocumentationView(APIView):
                 model = Models.objects.filter(id_user=payload['id'], id=modelId).first()
                 try:
                     model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-                    result = model.doc.to_json(orient="records")
-                    parsed = loads(result)
-                    return Response(dumps(parsed, sort_keys=True, indent=4, separators=(',',': ')))
+                    result = model.doc.to_dict(orient="records")
+                    result = splitLimitsAttributes(result)
+                    return Response(result)
                 except:
                     response = Response()
                     response.status_code=400
