@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.0 (Debian 16.0-1.pgdg120+1)
--- Dumped by pg_dump version 16.0 (Debian 16.0-1.pgdg120+1)
+-- Dumped from database version 16.1 (Debian 16.1-1.pgdg120+1)
+-- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,6 +19,78 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: Users_models; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Users_models" (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL,
+    image character varying(100) NOT NULL,
+    file character varying(100) NOT NULL,
+    id_user_id integer NOT NULL
+);
+
+
+ALTER TABLE public."Users_models" OWNER TO admin;
+
+--
+-- Name: Users_models_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Users_models_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Users_models_id_seq" OWNER TO admin;
+
+--
+-- Name: Users_models_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Users_models_id_seq" OWNED BY public."Users_models".id;
+
+
+--
+-- Name: Users_submodels; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public."Users_submodels" (
+    id integer NOT NULL,
+    id_model_id integer NOT NULL,
+    file character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public."Users_submodels" OWNER TO admin;
+
+--
+-- Name: Users_submodels_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public."Users_submodels_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Users_submodels_id_seq" OWNER TO admin;
+
+--
+-- Name: Users_submodels_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public."Users_submodels_id_seq" OWNED BY public."Users_submodels".id;
+
 
 --
 -- Name: Users_users; Type: TABLE; Schema: public; Owner: admin
@@ -365,6 +437,69 @@ CREATE TABLE public.django_session (
 ALTER TABLE public.django_session OWNER TO admin;
 
 --
+-- Name: otp_totp_totpdevice; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.otp_totp_totpdevice (
+    id integer NOT NULL,
+    name character varying(64) NOT NULL,
+    confirmed boolean NOT NULL,
+    key character varying(80) NOT NULL,
+    step smallint NOT NULL,
+    t0 bigint NOT NULL,
+    digits smallint NOT NULL,
+    tolerance smallint NOT NULL,
+    drift smallint NOT NULL,
+    last_t bigint NOT NULL,
+    user_id integer NOT NULL,
+    throttling_failure_count integer NOT NULL,
+    throttling_failure_timestamp timestamp with time zone,
+    CONSTRAINT otp_totp_totpdevice_digits_check CHECK ((digits >= 0)),
+    CONSTRAINT otp_totp_totpdevice_step_check CHECK ((step >= 0)),
+    CONSTRAINT otp_totp_totpdevice_throttling_failure_count_check CHECK ((throttling_failure_count >= 0)),
+    CONSTRAINT otp_totp_totpdevice_tolerance_check CHECK ((tolerance >= 0))
+);
+
+
+ALTER TABLE public.otp_totp_totpdevice OWNER TO admin;
+
+--
+-- Name: otp_totp_totpdevice_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.otp_totp_totpdevice_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.otp_totp_totpdevice_id_seq OWNER TO admin;
+
+--
+-- Name: otp_totp_totpdevice_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.otp_totp_totpdevice_id_seq OWNED BY public.otp_totp_totpdevice.id;
+
+
+--
+-- Name: Users_models id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_models" ALTER COLUMN id SET DEFAULT nextval('public."Users_models_id_seq"'::regclass);
+
+
+--
+-- Name: Users_submodels id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_submodels" ALTER COLUMN id SET DEFAULT nextval('public."Users_submodels_id_seq"'::regclass);
+
+
+--
 -- Name: Users_users id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -425,6 +560,30 @@ ALTER TABLE ONLY public.django_content_type ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY public.django_migrations ALTER COLUMN id SET DEFAULT nextval('public.django_migrations_id_seq'::regclass);
+
+
+--
+-- Name: otp_totp_totpdevice id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.otp_totp_totpdevice ALTER COLUMN id SET DEFAULT nextval('public.otp_totp_totpdevice_id_seq'::regclass);
+
+
+--
+-- Data for Name: Users_models; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public."Users_models" (id, name, image, file, id_user_id) FROM stdin;
+75	Coffee cup	models/1/Coffee cup/image/A_small_cup_of_coffee.JPG	models/1/Coffee cup/files/teacup.xmile	1
+\.
+
+
+--
+-- Data for Name: Users_submodels; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public."Users_submodels" (id, id_model_id, file) FROM stdin;
+\.
 
 
 --
@@ -500,6 +659,18 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 22	Can change user	6	change_users
 23	Can delete user	6	delete_users
 24	Can view user	6	view_users
+25	Can add models	7	add_models
+26	Can change models	7	change_models
+27	Can delete models	7	delete_models
+28	Can view models	7	view_models
+29	Can add sub models	8	add_submodels
+30	Can change sub models	8	change_submodels
+31	Can delete sub models	8	delete_submodels
+32	Can view sub models	8	view_submodels
+33	Can add TOTP device	9	add_totpdevice
+34	Can change TOTP device	9	change_totpdevice
+35	Can delete TOTP device	9	delete_totpdevice
+36	Can view TOTP device	9	view_totpdevice
 \.
 
 
@@ -522,6 +693,9 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 4	contenttypes	contenttype
 5	sessions	session
 6	Users	users
+7	Users	models
+8	Users	submodels
+9	otp_totp	totpdevice
 \.
 
 
@@ -550,6 +724,14 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 18	admin	0002_logentry_remove_auto_add	2023-11-08 13:36:10.94465+00
 19	admin	0003_logentry_add_action_flag_choices	2023-11-08 13:36:10.963325+00
 20	sessions	0001_initial	2023-11-08 13:36:11.023306+00
+21	Users	0003_models	2023-12-26 19:44:34.377669+00
+22	Users	0004_auto_20231126_1217	2023-12-26 19:44:34.454949+00
+23	Users	0005_alter_models_file	2023-12-26 19:44:34.482476+00
+24	Users	0006_submodels	2023-12-26 19:44:34.551201+00
+25	Users	0007_submodels_file	2023-12-26 19:44:34.575403+00
+26	Users	0008_alter_submodels_file	2023-12-26 19:44:34.594271+00
+27	otp_totp	0001_initial	2023-12-26 19:44:34.648706+00
+28	otp_totp	0002_auto_20190420_0723	2023-12-26 19:44:34.686097+00
 \.
 
 
@@ -559,6 +741,28 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 
 COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
 \.
+
+
+--
+-- Data for Name: otp_totp_totpdevice; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.otp_totp_totpdevice (id, name, confirmed, key, step, t0, digits, tolerance, drift, last_t, user_id, throttling_failure_count, throttling_failure_timestamp) FROM stdin;
+\.
+
+
+--
+-- Name: Users_models_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public."Users_models_id_seq"', 76, true);
+
+
+--
+-- Name: Users_submodels_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public."Users_submodels_id_seq"', 1, false);
 
 
 --
@@ -622,6 +826,37 @@ SELECT pg_catalog.setval('public.django_content_type_id_seq', 6, true);
 --
 
 SELECT pg_catalog.setval('public.django_migrations_id_seq', 20, true);
+
+
+--
+-- Name: otp_totp_totpdevice_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.otp_totp_totpdevice_id_seq', 1, false);
+
+
+--
+-- Name: Users_models Users_models_id_user_id_name_89f73558_uniq; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_models"
+    ADD CONSTRAINT "Users_models_id_user_id_name_89f73558_uniq" UNIQUE (id_user_id, name);
+
+
+--
+-- Name: Users_models Users_models_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_models"
+    ADD CONSTRAINT "Users_models_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Users_submodels Users_submodels_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_submodels"
+    ADD CONSTRAINT "Users_submodels_pkey" PRIMARY KEY (id);
 
 
 --
@@ -769,6 +1004,28 @@ ALTER TABLE ONLY public.django_session
 
 
 --
+-- Name: otp_totp_totpdevice otp_totp_totpdevice_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.otp_totp_totpdevice
+    ADD CONSTRAINT otp_totp_totpdevice_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: Users_models_id_user_id_1b35331f; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX "Users_models_id_user_id_1b35331f" ON public."Users_models" USING btree (id_user_id);
+
+
+--
+-- Name: Users_submodels_id_model_id_f83e874d; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX "Users_submodels_id_model_id_f83e874d" ON public."Users_submodels" USING btree (id_model_id);
+
+
+--
 -- Name: Users_users_email_983e4e0b_like; Type: INDEX; Schema: public; Owner: admin
 --
 
@@ -867,6 +1124,29 @@ CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session U
 
 
 --
+-- Name: otp_totp_totpdevice_user_id_0fb18292; Type: INDEX; Schema: public; Owner: admin
+--
+
+CREATE INDEX otp_totp_totpdevice_user_id_0fb18292 ON public.otp_totp_totpdevice USING btree (user_id);
+
+
+--
+-- Name: Users_models Users_models_id_user_id_1b35331f_fk_Users_users_id; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_models"
+    ADD CONSTRAINT "Users_models_id_user_id_1b35331f_fk_Users_users_id" FOREIGN KEY (id_user_id) REFERENCES public."Users_users"(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: Users_submodels Users_submodels_id_model_id_f83e874d_fk_Users_models_id; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."Users_submodels"
+    ADD CONSTRAINT "Users_submodels_id_model_id_f83e874d_fk_Users_models_id" FOREIGN KEY (id_model_id) REFERENCES public."Users_models"(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: Users_users_groups Users_users_groups_group_id_5a0b88fb_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -936,6 +1216,14 @@ ALTER TABLE ONLY public.django_admin_log
 
 ALTER TABLE ONLY public.django_admin_log
     ADD CONSTRAINT "django_admin_log_user_id_c564eba6_fk_Users_users_id" FOREIGN KEY (user_id) REFERENCES public."Users_users"(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: otp_totp_totpdevice otp_totp_totpdevice_user_id_0fb18292_fk_Users_users_id; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.otp_totp_totpdevice
+    ADD CONSTRAINT "otp_totp_totpdevice_user_id_0fb18292_fk_Users_users_id" FOREIGN KEY (user_id) REFERENCES public."Users_users"(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
