@@ -62,3 +62,12 @@ def getModelDocumentation(modelId,userId):
         return result
     else:
         raise NotAllowedAccess()
+    
+def getModelExecutionResult(modelId,userId):
+    model = Models.objects.filter(id_user=userId, id=modelId).first()
+    if model is not None:
+        model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+        result = model.run()
+        return result
+    else:
+        raise NotAllowedAccess()

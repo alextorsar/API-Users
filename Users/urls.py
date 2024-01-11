@@ -4,9 +4,10 @@ from django.conf.urls.static import static
 from .userViews import RegisterView, LoginView, UserView, LogOutView
 from .ModelManagment.modelViews import ModelView
 from .SubModelManagment.submodelViews import SubModelView
-from .ModelManagment.modelExecutionViews import ModelDocumentationView
+from .ModelManagment.modelExecutionViews import ModelDocumentationView, ModelExecutionView
 
 urlpatterns = [
+    path('model/<int:modelId>/run/', ModelExecutionView.as_view()),
     path('model/<int:modelId>/documentation/', ModelDocumentationView.as_view()),
     path('model/<int:modelId>/', ModelView.as_view()),
     path('register/', RegisterView.as_view()),
