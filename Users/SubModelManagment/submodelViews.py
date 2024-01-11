@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import SubModelSerializer
-from .models import Models, SubModels
+from ..serializers import SubModelSerializer
+from ..models import Models, SubModels
 from APIUsers import settings
-from .auth import authenticate
+from ..auth import authenticate
 from os import remove
 import os
 

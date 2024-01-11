@@ -2,12 +2,13 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import ModelSerializer
-from .models import Models
-from shutil import rmtree
+from ..serializers import ModelSerializer
+from ..models import Models
 from APIUsers import settings
-from .auth import authenticate
-from .modelExecutionViews import loadModel
+from ..auth import authenticate
+
+from ..SubModelManagment.submodelViews import SubModelView
+from ..ModelManagment import modelController
 import os
 
 class ModelView(APIView):
@@ -15,20 +16,16 @@ class ModelView(APIView):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
-            request.data['id_user'] = payload['id']
-            serializer = ModelSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            request.data['id_user'] = payload['id'] 
             try:
-                model = Models.objects.filter(pk=serializer.data['id']).first()
-                loadModel(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-                return Response(serializer.data)
-            except Exception:
-                self.delete(self,serializer.data)
+                model = modelController.createModel(request) 
+                return Response(model)
+            except Exception as e:
+                print(e)
                 response = Response()
                 response.status_code=400
                 response.data = {
-                    'message': 'The model was not correctly defined'
+                    'message': 'Model could not be created'
                 }
                 return response
         except AuthenticationFailed as authFailed:
@@ -39,25 +36,19 @@ class ModelView(APIView):
         try:
             payload = authenticate(token)
             if(modelId == -1):
-                models = Models.objects.filter(id_user=payload['id'])
-                result = []
-                for model in models:
-                    serializer = ModelSerializer(model)
-                    result.append(serializer.data)
-                return Response(result)
+                models = modelController.getUserModels(payload['id'])
+                return Response(models)
             else:
-               model = Models.objects.filter(id_user=payload['id'], id=modelId).first()
+               model = modelController.getModel(payload['id'], modelId)
                if(model is not None):
-                    serializer = ModelSerializer(model)
-                    return Response(serializer.data)
+                    return Response(model)
                else:
                     response = Response()
                     response.status_code=400
                     response.data = {
                         'message': 'Model not found'
                     }
-                    return response
-                   
+                    return response         
         except AuthenticationFailed as authFailed:
             raise authFailed
     
@@ -65,17 +56,13 @@ class ModelView(APIView):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
-            model = Models.objects.filter(id_user=payload['id'], id=request.data['id']).first()
-            serializer = ModelSerializer(model)
-            rmtree(os.path.join(settings.MEDIA_ROOT, "models", str(serializer.data['id_user']), serializer.data['name']))
-            model.delete()
+            modelController.deleteModel(request.data['id'],payload['id'])
             response = Response()
             response.data = {
             'message': 'Model deleted succesfully'
             }
             return response
         except AuthenticationFailed as authFailed:
-            print(token)
             raise authFailed
         except Exception as e:
             print(e)

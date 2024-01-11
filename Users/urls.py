@@ -2,9 +2,9 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from .userViews import RegisterView, LoginView, UserView, LogOutView
-from .modelViews import ModelView
-from .submodelViews import SubModelView
-from .modelExecutionViews import ModelDocumentationView
+from .ModelManagment.modelViews import ModelView
+from .SubModelManagment.submodelViews import SubModelView
+from .ModelManagment.modelExecutionViews import ModelDocumentationView
 
 urlpatterns = [
     path('model/<int:modelId>/documentation/', ModelDocumentationView.as_view()),

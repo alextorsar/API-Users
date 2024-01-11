@@ -31,14 +31,14 @@ class Models(models.Model):
     name=models.CharField(max_length=50)
     id_user=models.ForeignKey(Users,null=False,blank=False, on_delete=models.CASCADE)
     image=models.ImageField(upload_to= generate_image_dirname, null=False)
-    file=models.FileField(upload_to= generate_files_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile","mdl"])])
+    file=models.FileField(upload_to= generate_files_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile"])])
     class Meta:
         unique_together = ('id_user','name')
 
 class SubModels(models.Model):
     id=models.AutoField(primary_key=True)
     id_model=models.ForeignKey(Models,null=False,blank=False, on_delete=models.CASCADE)
-    file=models.FileField(upload_to= "models/1/model5/files/", null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile","mdl"])])
+    file=models.FileField(upload_to= get_parent_model_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile"])])
     
 
     
