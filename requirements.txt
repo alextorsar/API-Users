@@ -7,3 +7,4 @@ django_otp
 Pillow==10.1.0
 lxml==4.9.3
 pysd==3.12.0
+netCDF4==1.6.5
