@@ -574,7 +574,6 @@ ALTER TABLE ONLY public.otp_totp_totpdevice ALTER COLUMN id SET DEFAULT nextval(
 --
 
 COPY public."Users_models" (id, name, image, file, id_user_id) FROM stdin;
-75	Coffee cup	models/1/Coffee cup/image/A_small_cup_of_coffee.JPG	models/1/Coffee cup/files/teacup.xmile	1
 \.
 
 
@@ -755,7 +754,7 @@ COPY public.otp_totp_totpdevice (id, name, confirmed, key, step, t0, digits, tol
 -- Name: Users_models_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public."Users_models_id_seq"', 76, true);
+SELECT pg_catalog.setval('public."Users_models_id_seq"', 81, true);
 
 
 --
