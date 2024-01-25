@@ -5,6 +5,7 @@ from ..models import Models
 import os
 from APIUsers import settings
 from shutil import rmtree
+from ..exceptions import ModelExceptions
 
 def createModel(request):
     serializer = saveModelToDatabase(modelData=request.data)
@@ -18,15 +19,23 @@ def createModel(request):
             try:
                 subModelController.createSubmodel(subModelObject)
             except Exception as e:
-                        raise e
-    transformModel(serializer.data['id'])
+                deleteModel(serializer.data['id'],serializer.data['id_user'])
+                raise e
+    try:
+        transformModel(serializer.data['id'])
+    except Exception as e:
+        deleteModel(serializer.data['id'],serializer.data['id_user'])
+        raise e
     return serializer.data
 
 def deleteModel(modelId,userId):
     model = Models.objects.filter(id_user=userId, id=modelId).first()
-    serializer = ModelSerializer(model)
-    rmtree(os.path.join(settings.MEDIA_ROOT, "models", str(serializer.data['id_user']), serializer.data['name']))
-    model.delete()
+    if (model is not None):
+        serializer = ModelSerializer(model)
+        rmtree(os.path.join(settings.MEDIA_ROOT, "models", str(serializer.data['id_user']), serializer.data['name']))
+        model.delete()
+    else:
+        raise ModelExceptions.NotAllowedAccess()
 
 def getUserModels(userId):
     models = Models.objects.filter(id_user=userId)
@@ -46,8 +55,11 @@ def getModel(userId, modelId):
 
         
 def transformModel(modelId):
-    model = Models.objects.filter(pk=modelId).first()
-    loadModel(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+    try:
+        model = Models.objects.filter(pk=modelId).first()
+        loadModel(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+    except Exception as e:
+        raise e
     
         
 def saveModelToDatabase(modelData):

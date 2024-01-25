@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
@@ -6,8 +5,6 @@ from ..serializers import ModelSerializer
 from ..models import Models
 from APIUsers import settings
 from ..auth import authenticate
-
-from ..SubModelManagment.submodelViews import SubModelView
 from ..ModelManagment import modelController
 import os
 
@@ -15,19 +12,14 @@ class ModelView(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
         try:
+            print(request.data)
             payload = authenticate(token)
             request.data['id_user'] = payload['id'] 
             try:
                 model = modelController.createModel(request) 
                 return Response(model)
             except Exception as e:
-                print(e)
-                response = Response()
-                response.status_code=400
-                response.data = {
-                    'message': 'Model could not be created'
-                }
-                return response
+                raise e
         except AuthenticationFailed as authFailed:
             raise authFailed
     

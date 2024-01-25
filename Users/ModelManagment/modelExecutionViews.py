@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from ..auth import authenticate
-from .modelExecutionController import getModelDocumentation, getModelExecutionResult, NotAllowedAccess, IncorrectModelDefinition, IncorrectFileExtension, IncorrectModelPath
+from .modelExecutionController import getModelDocumentation, getModelExecutionResult
 
 class ModelDocumentationView(APIView):
     def get(self,request,modelId=-1):

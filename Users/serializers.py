@@ -21,6 +21,18 @@ class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Models
         fields = ['id', 'name', 'id_user', 'image', 'file']
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('id_user', 'name'),
+                message="You already have a model with this name"
+            )
+        ]
+        extra_kwargs = {
+            "name": {"error_messages": {"required": "Model name is required"}},
+            "image": {"error_messages": {"required": "Model image is required"}},
+            "file": {"error_messages": {"required": "Model file is required"}}
+        }
         
 class SubModelSerializer(serializers.ModelSerializer):
     class Meta:

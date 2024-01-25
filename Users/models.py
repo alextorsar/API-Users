@@ -32,8 +32,10 @@ class Models(models.Model):
     id_user=models.ForeignKey(Users,null=False,blank=False, on_delete=models.CASCADE)
     image=models.ImageField(upload_to= generate_image_dirname, null=False)
     file=models.FileField(upload_to= generate_files_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile"])])
+    REQUIRED_FIELDS = ['name', 'id_user','image', 'file']
     class Meta:
         unique_together = ('id_user','name')
+
 
 class SubModels(models.Model):
     id=models.AutoField(primary_key=True)

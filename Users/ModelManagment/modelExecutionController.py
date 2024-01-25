@@ -3,18 +3,7 @@ import pysd
 from APIUsers import settings
 import os.path
 import math
-
-class NotAllowedAccess(Exception):
-    message = "You are not allowed to access this model"
-
-class IncorrectModelPath(Exception):
-    message = "The model path was not correct"
-
-class IncorrectFileExtension(Exception):
-    message = "Only .xmile files are allowed"
-
-class IncorrectModelDefinition(Exception):
-    message = "The model was not correctly defined"
+from ..exceptions import ModelExceptions,ModelExecutionExceptions
 
 def getModelFromPath(modelPath):
     try:
@@ -22,19 +11,17 @@ def getModelFromPath(modelPath):
         path = file + ".py"
         return pysd.load(path)
     except Exception:
-        raise IncorrectModelPath()
+        raise ModelExecutionExceptions.IncorrectModelPath()
 
 def loadModel(modelPath):
     file, extension = os.path.splitext(modelPath)
     try:
         if extension == '.xmile':
             pysd.read_xmile(modelPath)
-        elif extension == '.mdl':
-            pysd.read_vensim(modelPath)
         else:
-            raise IncorrectFileExtension()
+            raise ModelExecutionExceptions.IncorrectFileExtension()
     except Exception:
-        raise IncorrectModelDefinition()
+        raise ModelExecutionExceptions.IncorrectModelDefinition()
 
 def splitLimitsAttributes(variables):
     i = 0
@@ -61,7 +48,7 @@ def getModelDocumentation(modelId,userId):
         result = splitLimitsAttributes(result)
         return result
     else:
-        raise NotAllowedAccess()
+        raise ModelExceptions.NotAllowedAccess()
     
 def getModelExecutionResult(modelId,userId):
     model = Models.objects.filter(id_user=userId, id=modelId).first()
@@ -70,4 +57,4 @@ def getModelExecutionResult(modelId,userId):
         result = model.run()
         return result
     else:
-        raise NotAllowedAccess()
+        raise ModelExceptions.NotAllowedAccess()
