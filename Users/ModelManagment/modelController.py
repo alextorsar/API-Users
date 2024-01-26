@@ -6,9 +6,12 @@ import os
 from APIUsers import settings
 from shutil import rmtree
 from ..exceptions import ModelExceptions
+import lxml.etree
 
 def createModel(request):
     serializer = saveModelToDatabase(modelData=request.data)
+    if not containsDefaultSimSpecs(serializer.data['id']):
+        addDefaultSimSpecs(serializer.data['id'])
     if request.data.get('submodels'):
         submodels = request.data.getlist('submodels')
         for submodel in submodels:
@@ -67,3 +70,19 @@ def saveModelToDatabase(modelData):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return serializer
+
+def containsDefaultSimSpecs(modelId):
+    model = Models.objects.filter(pk=modelId).first()
+    path = os.path.join(settings.MEDIA_ROOT,str(model.file))
+    tree = lxml.etree.parse(path)
+    expr = "//*[local-name() = $name]"
+    r = tree.xpath(expr, name = "sim_specs")
+    return len(r) > 0
+
+def addDefaultSimSpecs(modelId):
+    model = Models.objects.filter(pk=modelId).first()
+    path = os.path.join(settings.MEDIA_ROOT,str(model.file))
+    tree = lxml.etree.parse(path)
+    root = tree.getroot()
+    root.append(lxml.etree.XML("<sim_specs> <stop>30.0</stop><start>0.0</start><dt>0.125</dt></sim_specs>"))
+    tree.write(path, pretty_print=True)
