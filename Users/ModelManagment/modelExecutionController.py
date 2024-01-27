@@ -50,11 +50,11 @@ def getModelDocumentation(modelId,userId):
     else:
         raise ModelExceptions.NotAllowedAccess()
     
-def getModelExecutionResult(modelId,userId):
+def getModelExecutionResult(modelId,userId,executionConditions):
     model = Models.objects.filter(id_user=userId, id=modelId).first()
     if model is not None:
         model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-        result = model.run()
+        result = model.run(initial_condition=(executionConditions['start_time'],executionConditions['initial_condition']),params=executionConditions['params'])
         return result
     else:
         raise ModelExceptions.NotAllowedAccess()

@@ -25,12 +25,13 @@ class ModelDocumentationView(APIView):
         
 class ModelExecutionView(APIView):
     def get(self,request,modelId=-1):
+        executionConditions = request.data['executionConditions']
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
             if (modelId!=-1):
                 try:
-                    result = getModelExecutionResult(modelId,payload['id'])
+                    result = getModelExecutionResult(modelId,payload['id'],executionConditions)
                     return Response(result)
                 except Exception as e:
                     print(e)
