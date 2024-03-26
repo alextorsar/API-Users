@@ -40,6 +40,51 @@ def deleteModel(modelId,userId):
     else:
         raise ModelExceptions.NotAllowedAccess()
 
+def updateModel(newModel,userId):
+    model = Models.objects.filter(id_user=userId, id=newModel['id']).first()
+    oldImage = oldFile = oldName = None
+    if(model is not None):
+        if 'name' in newModel and model.name != newModel['name']:
+            fileSrc = str(model.file)
+            imageSrc = str(model.image)
+            model.file = os.path.join(settings.MEDIA_ROOT, "models", str(userId), newModel['name'], "files", fileSrc.split("/")[-1])
+            model.image = os.path.join(settings.MEDIA_ROOT, "models", str(userId), newModel['name'], "image", imageSrc.split("/")[-1])
+            oldName = model.name
+            url = os.path.join(settings.MEDIA_ROOT, "models", str(userId))
+            os.rename(os.path.join(url,model.name),os.path.join(url,newModel['name']))
+            model.name=newModel['name']
+        if 'image' in newModel:
+            oldImage = model.image
+            model.image=newModel['image']
+        if 'file' in newModel:
+            oldFile = model.file
+            model.file=newModel['file']
+        try:
+            model.save()
+            transformModel(newModel['id'])
+            if 'image' in newModel:
+                os.remove(os.path.join(settings.MEDIA_ROOT,str(oldImage)))
+            if 'file' in newModel:
+                os.remove(os.path.splitext(os.path.join(settings.MEDIA_ROOT,str(oldFile)))[0] + ".py")
+                os.remove(os.path.join(settings.MEDIA_ROOT,str(oldFile)))
+            serializer = ModelSerializer(model)
+            return serializer.data
+        except Exception as e:
+            print(e)
+            if 'image' in newModel:
+                os.remove(os.path.join(settings.MEDIA_ROOT,str(model.image)))
+                model.image = oldImage
+            if 'file' in newModel:
+                os.remove(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+                model.file = oldFile
+            if 'name' in newModel and oldName is not None:
+                os.rename(os.path.join(url,model.name),os.path.join(url,oldName))
+                model.name = oldName
+            model.save()
+            raise e
+    else:
+        raise ModelExceptions.NotAllowedAccess()
+
 def getUserModels(userId):
     models = Models.objects.filter(id_user=userId)
     result = []

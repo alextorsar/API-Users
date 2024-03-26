@@ -1,5 +1,5 @@
 """
-Python model 'corporate-growth.py'
+Python model 'variables.py'
 Translated using PySD
 """
 

@@ -12,7 +12,6 @@ class ModelView(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
         try:
-            print(request.data)
             payload = authenticate(token)
             request.data['id_user'] = payload['id'] 
             try:
@@ -25,7 +24,6 @@ class ModelView(APIView):
     
     def get(self,request,modelId=-1):
         token = request.COOKIES.get('jwt')
-        print(token)
         try:
             payload = authenticate(token)
             if(modelId == -1):
@@ -58,7 +56,6 @@ class ModelView(APIView):
         except AuthenticationFailed as authFailed:
             raise authFailed
         except Exception as e:
-            print(e)
             response = Response()
             response.status_code = 400
             response.data = {
@@ -70,25 +67,14 @@ class ModelView(APIView):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
-            model = Models.objects.filter(id_user=payload['id'], pk=request.data['id']).first()
-            if model.image != request.data['image']:
-                os.remove(os.path.join(settings.MEDIA_ROOT,str(model.image)))
-                model.image=request.data['image']
-            if model.file != request.data['file']:
-                os.remove(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-                model.file=request.data['file']
-            if model.name != request.data['name']:
-                url = os.path.join(settings.MEDIA_ROOT, "models", str(payload['id']))
-                os.rename(os.path.join(url,model.name),os.path.join(url,request.data['name']))
-                model.name=request.data['name']
-            model.save()
-            serializer = ModelSerializer(model)
-            return Response(serializer.data)
+            newModel = modelController.updateModel(request.data,payload['id'])
+            return Response(newModel)
         except AuthenticationFailed as authFailed:
             raise authFailed
         except Exception as e:
             response = Response()
             response.data = {
-            'message': e
+            'message': 'Model could not be updated'
             }
+            response.status_code = 400
             return response
