@@ -25,16 +25,17 @@ class ModelView(APIView):
     
     def get(self,request,modelId=-1):
         token = request.COOKIES.get('jwt')
+        print(token)
         try:
             payload = authenticate(token)
             if(modelId == -1):
                 models = modelController.getUserModels(payload['id'])
                 return Response(models)
             else:
-               model = modelController.getModel(payload['id'], modelId)
-               if(model is not None):
+                model = modelController.getModel(payload['id'], modelId)
+                if(model is not None):
                     return Response(model)
-               else:
+                else:
                     response = Response()
                     response.status_code=400
                     response.data = {
