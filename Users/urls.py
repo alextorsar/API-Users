@@ -15,5 +15,6 @@ urlpatterns = [
     path('user/', UserView.as_view()),
     path('logout/', LogOutView.as_view()),
     path('model/', ModelView.as_view()),
+    path('submodel/<int:modelId>/', SubModelView.as_view()),
     path('submodel/', SubModelView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

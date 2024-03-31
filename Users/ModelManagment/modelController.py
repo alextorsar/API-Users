@@ -1,10 +1,10 @@
 from ..serializers import ModelSerializer
 from ..SubModelManagment import subModelController
 from .modelExecutionController import loadModel
-from ..models import Models
+from ..models import Models, SubModels
 import os
 from APIUsers import settings
-from shutil import rmtree
+from shutil import rmtree, move
 from ..exceptions import ModelExceptions
 import lxml.etree
 
@@ -43,6 +43,7 @@ def deleteModel(modelId,userId):
 def updateModel(newModel,userId):
     model = Models.objects.filter(id_user=userId, id=newModel['id']).first()
     oldImage = oldFile = oldName = None
+    newSubModels = []
     if(model is not None):
         if 'name' in newModel and model.name != newModel['name']:
             fileSrc = str(model.file)
@@ -59,6 +60,27 @@ def updateModel(newModel,userId):
         if 'file' in newModel:
             oldFile = model.file
             model.file=newModel['file']
+        if 'subModelsToDelete' in newModel:
+            auxDirectory = os.path.join(settings.MEDIA_ROOT, newModel['id'])
+            os.mkdir(auxDirectory)
+            subModelsToDelete = newModel.getlist('subModelsToDelete')
+            for subModelId in subModelsToDelete: 
+                subModel = SubModels.objects.filter(id=subModelId).first()
+                try:
+                    move(os.path.join(settings.MEDIA_ROOT,str(subModel.file)), auxDirectory)
+                except Exception as e:    
+                    raise e
+        if 'submodels' in newModel:
+            submodels = newModel.getlist('submodels')
+            for submodel in submodels:
+                try:
+                    subModelObject = {
+                        'id_model':newModel['id'],
+                        'file':submodel
+                    }
+                    newSubModels.append(subModelController.createSubmodel(subModelObject)['id'])
+                except Exception as e:
+                    raise e
         try:
             model.save()
             transformModel(newModel['id'])
@@ -67,10 +89,13 @@ def updateModel(newModel,userId):
             if 'file' in newModel:
                 os.remove(os.path.splitext(os.path.join(settings.MEDIA_ROOT,str(oldFile)))[0] + ".py")
                 os.remove(os.path.join(settings.MEDIA_ROOT,str(oldFile)))
+            if 'subModelsToDelete' in newModel:
+                rmtree(os.path.join(settings.MEDIA_ROOT, newModel['id']))
+                for subModelId in newModel.getlist('subModelsToDelete'):
+                    subModelController.deleteSubModel(subModelId, userId)
             serializer = ModelSerializer(model)
             return serializer.data
         except Exception as e:
-            print(e)
             if 'image' in newModel:
                 os.remove(os.path.join(settings.MEDIA_ROOT,str(model.image)))
                 model.image = oldImage
@@ -80,6 +105,16 @@ def updateModel(newModel,userId):
             if 'name' in newModel and oldName is not None:
                 os.rename(os.path.join(url,model.name),os.path.join(url,oldName))
                 model.name = oldName
+            if 'subModelsToDelete' in newModel:
+                for subModelId in newModel.getlist('subModelsToDelete'):
+                    subModel = SubModels.objects.filter(id=subModelId).first()
+                    move(os.path.join(settings.MEDIA_ROOT, newModel['id'], str(subModel.file).split("/")[-1]), os.path.join(settings.MEDIA_ROOT, str(subModel.file)))
+                rmtree(os.path.join(settings.MEDIA_ROOT, newModel['id']))
+            if 'submodels' in newModel:
+                for subModelId in newSubModels:
+                    subModel = SubModels.objects.filter(id=subModelId).first()
+                    subModelController.deleteSubModel(subModelId, userId)
+                    os.remove(os.path.join(settings.MEDIA_ROOT, str(subModel.file)))
             model.save()
             raise e
     else:

@@ -40,7 +40,7 @@ class Models(models.Model):
 class SubModels(models.Model):
     id=models.AutoField(primary_key=True)
     id_model=models.ForeignKey(Models,null=False,blank=False, on_delete=models.CASCADE)
-    file=models.FileField(upload_to= get_parent_model_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile"])])
+    file=models.FileField(upload_to=get_parent_model_dirname, null=False, validators=[FileExtensionValidator(allowed_extensions=["xmile"])])
     
 
     

@@ -136,5 +136,5 @@ AUTH_USER_MODEL = 'Users.Users'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-MEDIA_ROOT = BASE_DIR + "/files"
+MEDIA_ROOT = BASE_DIR + "/files/"
 MEDIA_URL = "/media-files/"
