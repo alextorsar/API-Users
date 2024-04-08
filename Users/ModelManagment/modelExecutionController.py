@@ -1,9 +1,12 @@
 from ..models import Models
 import pysd
 from APIUsers import settings
-import os.path
+import os.path, os
 import math
 from ..exceptions import ModelExceptions,ModelExecutionExceptions
+import pandas as pd
+import shutil
+import json
 
 def getModelFromPath(modelPath):
     try:
@@ -49,12 +52,43 @@ def getModelDocumentation(modelId,userId):
         return result
     else:
         raise ModelExceptions.NotAllowedAccess()
+
+def getFileFromChunks(file, name):
+    with open(name, 'wb') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+    return name
+
+def transformParamsFunctionsToPandasSeries(params, files, temporaryPath):
+    for key in params:
+        if params[key]['type'] == "FileObject":
+            name = os.path.join(temporaryPath, params[key]['name'])
+            extension = os.path.splitext(name)[1]
+            if extension in ['.xlsx', '.xls']:
+                excelFilePath = getFileFromChunks(files['params[{}]'.format(key)], name)
+                excelDataFrame = pd.read_excel(excelFilePath)
+                if 'xpts' in excelDataFrame.columns and 'ypts' in excelDataFrame.columns:
+                    params[key] = pd.Series(index=excelDataFrame['xpts'].tolist(), data=excelDataFrame['ypts'].tolist())
+                else:
+                    raise ModelExecutionExceptions.IncorrectExcelFile()
+            else:
+                raise ModelExecutionExceptions.IncorrectExcelFileExtension()
+    return params
     
-def getModelExecutionResult(modelId,userId,executionConditions):
-    model = Models.objects.filter(id_user=userId, id=modelId).first()
-    if model is not None:
-        model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-        result = model.run(initial_condition=(executionConditions['start_time'],executionConditions['initial_condition']),params=executionConditions['params'])
-        return result
-    else:
-        raise ModelExceptions.NotAllowedAccess()
+def getModelExecutionResult(modelId,userId,executionConditions, files):
+    temporaryPath = os.path.join(settings.MEDIA_ROOT, 'temp', str(modelId))
+    os.makedirs(temporaryPath)
+    try:
+        model = Models.objects.filter(id_user=userId, id=modelId).first()
+        params = json.loads(executionConditions['params'])
+        initial_condition = json.loads(executionConditions['initial_condition'])
+        start_time = int(executionConditions['start_time'])
+        params = transformParamsFunctionsToPandasSeries(params, files, temporaryPath)
+        if model is not None:
+            model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+            result = model.run(initial_condition=(start_time,initial_condition),params=params)
+            return result
+        else:
+            raise ModelExceptions.NotAllowedAccess()
+    finally:
+        shutil.rmtree(temporaryPath)

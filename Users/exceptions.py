@@ -16,6 +16,16 @@ class ModelExecutionExceptions():
         status_code = status.HTTP_400_BAD_REQUEST
         default_detail = 'The model was not correctly defined'
         default_code = 'model_bad_defined'
+    
+    class IncorrectExcelFile(APIException):
+        status_code = status.HTTP_400_BAD_REQUEST
+        default_detail = 'The excel file defining a lookup function was not correct'
+        default_code = 'incorrect_excel_file'
+    
+    class IncorrectExcelFileExtension(APIException):
+        status_code = status.HTTP_400_BAD_REQUEST
+        default_detail = 'Only .xlsx and .xls files are allowed as lookup functions'
+        default_code = 'extension_not_allowed'
 
 class ModelExceptions():
     

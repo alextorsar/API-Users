@@ -26,19 +26,19 @@ class ModelDocumentationView(APIView):
         
 class ModelExecutionView(APIView):
     def post(self,request,modelId=-1):
-        executionConditions = json.loads(request.data['executionConditions'])
+        executionConditions = request.data.dict()
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
             if (modelId!=-1):
                 try:
-                    result = getModelExecutionResult(modelId,payload['id'],executionConditions)
+                    result = getModelExecutionResult(modelId,payload['id'],executionConditions, request.FILES)
                     return Response(result)
                 except Exception as e:
                     response = Response()
                     response.status_code=400
                     response.data = {
-                        'message': e
+                        'message': e.default_detail
                     }
                     return response
         except AuthenticationFailed as authFailed:
