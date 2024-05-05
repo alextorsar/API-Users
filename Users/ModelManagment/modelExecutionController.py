@@ -10,10 +10,14 @@ import json
 
 def getModelFromPath(modelPath):
     try:
-        file, extension = os.path.splitext(modelPath)
-        path = file + ".py"
+        file_directory_array = modelPath.split('/')
+        file_directory = "/".join(file_directory_array[:-1])
+        file_name = file_directory_array[-1].split(".")[0]
+        path = os.path.join(file_directory, "processed", "{}_p.{}".format(file_name.lower(), "py"))
+        print(path)
         return pysd.load(path)
-    except Exception:
+    except Exception as e:
+        print(e)
         raise ModelExecutionExceptions.IncorrectModelPath()
 
 def loadModel(modelPath):
@@ -61,7 +65,7 @@ def getFileFromChunks(file, name):
 
 def transformParamsFunctionsToPandasSeries(params, files, temporaryPath):
     for key in params:
-        if params[key]['type'] == "FileObject":
+        if isinstance(params[key],dict) and params[key]['type'] == "FileObject":
             name = os.path.join(temporaryPath, params[key]['name'])
             extension = os.path.splitext(name)[1]
             if extension in ['.xlsx', '.xls']:
@@ -82,11 +86,13 @@ def getModelExecutionResult(modelId,userId,executionConditions, files):
         model = Models.objects.filter(id_user=userId, id=modelId).first()
         params = json.loads(executionConditions['params'])
         initial_condition = json.loads(executionConditions['initial_condition'])
-        start_time = int(executionConditions['start_time'])
+        start_time = float(executionConditions['start_time'])
+        final_time = float(executionConditions['final_time'])
+        time_step = float(executionConditions['time_step'])
         params = transformParamsFunctionsToPandasSeries(params, files, temporaryPath)
         if model is not None:
             model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
-            result = model.run(initial_condition=(start_time,initial_condition),params=params)
+            result = model.run(initial_condition=(start_time,initial_condition),params=params,final_time=final_time, time_step=time_step)
             return result
         else:
             raise ModelExceptions.NotAllowedAccess()

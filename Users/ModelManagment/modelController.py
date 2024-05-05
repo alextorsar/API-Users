@@ -3,15 +3,20 @@ from ..SubModelManagment import subModelController
 from .modelExecutionController import loadModel
 from ..models import Models, SubModels
 import os
+import subprocess
 from APIUsers import settings
 from shutil import rmtree, move
-from ..exceptions import ModelExceptions
+from ..exceptions import ModelExceptions, ModelExecutionExceptions
 import lxml.etree
 
 def createModel(request):
     serializer = saveModelToDatabase(modelData=request.data)
-    if not containsDefaultSimSpecs(serializer.data['id']):
-        addDefaultSimSpecs(serializer.data['id'])
+    try:
+        if not containsDefaultSimSpecs(serializer.data['id']):
+            addDefaultSimSpecs(serializer.data['id'])
+    except Exception as e:
+        deleteModel(serializer.data['id'],serializer.data['id_user'])
+        raise e
     if request.data.get('submodels'):
         submodels = request.data.getlist('submodels')
         for submodel in submodels:
@@ -32,6 +37,7 @@ def createModel(request):
     return serializer.data
 
 def deleteModel(modelId,userId):
+    print("Deleting model")
     model = Models.objects.filter(id_user=userId, id=modelId).first()
     if (model is not None):
         serializer = ModelSerializer(model)
@@ -87,7 +93,12 @@ def updateModel(newModel,userId):
             if 'image' in newModel:
                 os.remove(os.path.join(settings.MEDIA_ROOT,str(oldImage)))
             if 'file' in newModel:
-                os.remove(os.path.splitext(os.path.join(settings.MEDIA_ROOT,str(oldFile)))[0] + ".py")
+                file_directory_array = os.path.join(settings.MEDIA_ROOT,str(oldFile)).split('/')
+                file_directory = "/".join(file_directory_array[:-1])
+                file_name = file_directory_array[-1].split(".")[0]
+                os.remove(os.path.join(file_directory, "processed", "{}_p.{}".format(file_name.lower(), "py")))
+                os.remove(os.path.join(file_directory, "processed", "{}_p.{}".format(file_name.lower(), "xmile")))
+                os.remove(os.path.join(file_directory, "clean", "{}_c.{}".format(file_name.lower(), "xmile")))
                 os.remove(os.path.join(settings.MEDIA_ROOT,str(oldFile)))
             if 'subModelsToDelete' in newModel:
                 rmtree(os.path.join(settings.MEDIA_ROOT, newModel['id']))
@@ -139,10 +150,13 @@ def getModel(userId, modelId):
         
 def transformModel(modelId):
     try:
+        success = -1
         model = Models.objects.filter(pk=modelId).first()
-        loadModel(os.path.join(settings.MEDIA_ROOT,str(model.file)))
+        success = os.system('python {} {}'.format(os.path.join(settings.MEDIA_ROOT,"converter.py"),os.path.join(settings.MEDIA_ROOT,str(model.file))))
+        if success != 0:
+            raise ModelExecutionExceptions.IncorrectModelDefinition()
     except Exception as e:
-        raise e
+        raise ModelExecutionExceptions.IncorrectModelDefinition()
     
         
 def saveModelToDatabase(modelData):
@@ -154,9 +168,12 @@ def saveModelToDatabase(modelData):
 def containsDefaultSimSpecs(modelId):
     model = Models.objects.filter(pk=modelId).first()
     path = os.path.join(settings.MEDIA_ROOT,str(model.file))
-    tree = lxml.etree.parse(path)
-    expr = "//*[local-name() = $name]"
-    r = tree.xpath(expr, name = "sim_specs")
+    try:
+        tree = lxml.etree.parse(path)
+        expr = "//*[local-name() = $name]"
+        r = tree.xpath(expr, name = "sim_specs")
+    except Exception as e:
+        raise ModelExecutionExceptions.IncorrectModelDefinition()
     return len(r) > 0
 
 def addDefaultSimSpecs(modelId):
