@@ -147,6 +147,7 @@ for xmile_file in files:
             log.debug("Removed stock after introducing aux")
         except e:
             log.error("Failed to remove offending stock")
+            exit(-1)
 
     # Finding elemnents with duplicate names
     elems_with_name = model_root.xpath(".//*[@name]", namespaces=ns)
@@ -190,3 +191,4 @@ for xmile_file in files:
             model = pysd.read_xmile(processed_xmile_filename)
         except Exception as e:
             print(repr(e))
+            exit(-1)
