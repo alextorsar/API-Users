@@ -81,6 +81,8 @@ def transformParamsFunctionsToPandasSeries(params, files, temporaryPath):
     
 def getModelExecutionResult(modelId,userId,executionConditions, files):
     temporaryPath = os.path.join(settings.MEDIA_ROOT, 'temp', str(modelId))
+    if(os.path.exists(temporaryPath)):
+        shutil.rmtree(temporaryPath)
     os.makedirs(temporaryPath)
     try:
         model = Models.objects.filter(id_user=userId, id=modelId).first()

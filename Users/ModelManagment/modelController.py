@@ -37,7 +37,6 @@ def createModel(request):
     return serializer.data
 
 def deleteModel(modelId,userId):
-    print("Deleting model")
     model = Models.objects.filter(id_user=userId, id=modelId).first()
     if (model is not None):
         serializer = ModelSerializer(model)
