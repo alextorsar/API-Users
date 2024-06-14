@@ -138,3 +138,5 @@ CORS_ALLOW_CREDENTIALS = True
 
 MEDIA_ROOT = BASE_DIR + "/files/"
 MEDIA_URL = "/media-files/"
+
+ALLOW_REGISTER = True

@@ -10,7 +10,6 @@ urlpatterns = [
     path('model/<int:modelId>/run/', ModelExecutionView.as_view()),
     path('model/<int:modelId>/documentation/', ModelDocumentationView.as_view()),
     path('model/<int:modelId>/', ModelView.as_view()),
-    path('register/', RegisterView.as_view()),
     path('login/', LoginView.as_view()),
     path('user/', UserView.as_view()),
     path('logout/', LogOutView.as_view()),
@@ -18,3 +17,6 @@ urlpatterns = [
     path('submodel/<int:modelId>/', SubModelView.as_view()),
     path('submodel/', SubModelView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if(settings.ALLOW_REGISTER):
+    urlpatterns.append(path('register/', RegisterView.as_view()))
