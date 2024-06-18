@@ -8,6 +8,7 @@ class Users(AbstractUser):
     id=models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     username = models.CharField(unique=True, max_length=50)
+    admin = models.BooleanField(default=False, null=False, blank=False)
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=100)
 

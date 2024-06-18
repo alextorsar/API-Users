@@ -8,7 +8,9 @@ import jwt, datetime
 
 class RegisterView(APIView):
     def post(self,request):
-        serializer = UserSerializer(data=request.data)
+        data = request.data.copy()
+        data['admin'] = False
+        serializer = UserSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)        

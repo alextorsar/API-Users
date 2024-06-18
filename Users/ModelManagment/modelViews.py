@@ -2,18 +2,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from ..serializers import ModelSerializer
-from ..models import Models
+from ..models import Models, Users
 from APIUsers import settings
 from ..auth import authenticate
 from ..ModelManagment import modelController
 import os
+from APIUsers.settings import ONLY_ADMIN_CAN_CREATE_MODELS
 
 class ModelView(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
-            request.data['id_user'] = payload['id'] 
+            request.data['id_user'] = payload['id']
+            if(ONLY_ADMIN_CAN_CREATE_MODELS):
+                user = Users.objects.filter(id=payload['id']).first()
+                if(not user.admin):
+                    raise AuthenticationFailed('Only admin can create models')
             try:
                 model = modelController.createModel(request) 
                 return Response(model)
@@ -47,6 +52,10 @@ class ModelView(APIView):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
+            if ONLY_ADMIN_CAN_CREATE_MODELS:
+                user = Users.objects.filter(id=payload['id']).first()
+                if(not user.admin):
+                    raise AuthenticationFailed('Only admin can delete models')
             modelController.deleteModel(request.data['id'],payload['id'])
             response = Response()
             response.data = {
@@ -67,6 +76,10 @@ class ModelView(APIView):
         token = request.COOKIES.get('jwt')
         try:
             payload = authenticate(token)
+            if ONLY_ADMIN_CAN_CREATE_MODELS:
+                user = Users.objects.filter(id=payload['id']).first()
+                if(not user.admin):
+                    raise AuthenticationFailed('Only admin can update models')
             newModel = modelController.updateModel(request.data,payload['id'])
             return Response(newModel)
         except AuthenticationFailed as authFailed:
