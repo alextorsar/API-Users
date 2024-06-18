@@ -2,6 +2,7 @@ from ..serializers import SubModelSerializer
 from ..models import Models, SubModels
 from ..exceptions import ModelExceptions
 from ..ModelManagment import modelController
+from APIUsers.settings import PUBLIC_ACCESS_TO_MODELS
 
 def createSubmodel(subModelData):
     serializer = SubModelSerializer(data=subModelData)
@@ -10,7 +11,10 @@ def createSubmodel(subModelData):
     return serializer.data
 
 def getSubModelsFromModel(idUser, parentId):
-    parentModel = Models.objects.filter(id_user=idUser, id=parentId).first()
+    if PUBLIC_ACCESS_TO_MODELS:
+        parentModel = Models.objects.filter(id=parentId).first()
+    else:
+        parentModel = Models.objects.filter(id_user=idUser, id=parentId).first()
     if(parentModel is not None):
         submodels = SubModels.objects.filter(id_model=parentId)
         result = []

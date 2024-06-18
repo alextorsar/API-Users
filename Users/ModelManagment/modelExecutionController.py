@@ -7,6 +7,7 @@ from ..exceptions import ModelExceptions,ModelExecutionExceptions
 import pandas as pd
 import shutil
 import json
+from APIUsers.settings import PUBLIC_ACCESS_TO_MODELS 
 
 def getModelFromPath(modelPath):
     try:
@@ -48,7 +49,10 @@ def splitLimitsAttributes(variables):
     return variables
 
 def getModelDocumentation(modelId,userId):
-    model = Models.objects.filter(id_user=userId, id=modelId).first()
+    if PUBLIC_ACCESS_TO_MODELS:
+        model = Models.objects.filter(id=modelId).first()
+    else:
+        model = Models.objects.filter(id_user=userId, id=modelId).first()
     if model is not None:
         model = getModelFromPath(os.path.join(settings.MEDIA_ROOT,str(model.file)))
         result = model.doc.to_dict(orient="records")
@@ -85,7 +89,10 @@ def getModelExecutionResult(modelId,userId,executionConditions, files):
         shutil.rmtree(temporaryPath)
     os.makedirs(temporaryPath)
     try:
-        model = Models.objects.filter(id_user=userId, id=modelId).first()
+        if PUBLIC_ACCESS_TO_MODELS:
+            model = Models.objects.filter(id=modelId).first()
+        else:
+            model = Models.objects.filter(id_user=userId, id=modelId).first()
         params = json.loads(executionConditions['params'])
         initial_condition = json.loads(executionConditions['initial_condition'])
         start_time = float(executionConditions['start_time'])

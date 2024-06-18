@@ -131,7 +131,10 @@ def updateModel(newModel,userId):
         raise ModelExceptions.NotAllowedAccess()
 
 def getUserModels(userId):
-    models = Models.objects.filter(id_user=userId)
+    if settings.PUBLIC_ACCESS_TO_MODELS:
+        models = Models.objects.all()
+    else:
+        models = Models.objects.filter(id_user=userId)
     result = []
     for model in models:
         serializer = ModelSerializer(model)
@@ -139,7 +142,10 @@ def getUserModels(userId):
     return result
 
 def getModel(userId, modelId):
-    model = Models.objects.filter(id_user=userId, id=modelId).first()
+    if settings.PUBLIC_ACCESS_TO_MODELS:
+        model = Models.objects.filter(id=modelId).first()
+    else:
+        model = Models.objects.filter(id_user=userId, id=modelId).first()
     if(model is not None):
         serializer = ModelSerializer(model)
         return serializer.data
